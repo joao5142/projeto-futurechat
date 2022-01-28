@@ -96,20 +96,21 @@ export default function PaginaInicial() {
                 neutral: {
                   textColor: appConfig.theme.colors.neutrals[200],
                   mainColor: appConfig.theme.colors.neutrals[900],
-                  mainColorHighlight: appConfig.theme.colors.primary[500],
+                  mainColorHighlight: appConfig.theme.colors.neutrals[400],
                   backgroundColor: appConfig.theme.colors.neutrals[800],
                 },
               }}
             />
             <Button
+              color="#333"
               type="submit"
               label="Entrar"
               fullWidth
               buttonColors={{
                 contrastColor: appConfig.theme.colors.neutrals["000"],
-                mainColor: appConfig.theme.colors.primary[500],
-                mainColorLight: appConfig.theme.colors.primary[400],
-                mainColorStrong: appConfig.theme.colors.primary[600],
+                mainColor: appConfig.theme.colors.neutrals[600],
+                mainColorLight: appConfig.theme.colors.neutrals[100],
+                mainColorStrong: appConfig.theme.colors.neutrals[400],
               }}
             />
           </Box>
