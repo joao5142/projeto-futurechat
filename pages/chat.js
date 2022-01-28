@@ -1,21 +1,44 @@
 import { Box, Text, TextField, Image, Button } from "@skynexui/components";
 import React from "react";
 import appConfig from "../config.json";
+import { createClient } from "@supabase/supabase-js";
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMyNjUzOCwiZXhwIjoxOTU4OTAyNTM4fQ.Somu03I_F7LFatsd9nKx5wjYTpf3uGjG5H0OdBFwsTc";
+const SUPABASE_URL = "https://fchcyfmpfumtmyytievh.supabase.co";
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-export default function ChatPage() {
+export default function ChatPage(props) {
   // Sua lógica vai aqui
   const [mensagem, setMensagem] = React.useState("");
   const [listaMensagem, setListaMensagem] = React.useState([]);
   // ./Sua lógica vai aqui
 
+  React.useEffect(() => {
+    console.log(props);
+  }, []);
+  React.useEffect(() => {
+    supabaseClient
+      .from("mensagens")
+      .select("*")
+      .then(({ data }) => {
+        setListaMensagem(data, ...listaMensagem);
+      });
+  }, [listaMensagem]);
+
   function handleNovaMensagem(novaMensagem) {
-    const mensagem = {
-      id: listaMensagem.length,
+    const mensagemObj = {
       user: "vanessa",
-      textoMensagem: novaMensagem,
+      texto: novaMensagem,
     };
-    setListaMensagem([mensagem, ...listaMensagem]);
-    setMensagem("");
+    //tem que ser um objeto com os mesmos campos
+    supabaseClient
+      .from("mensagens")
+      .insert([mensagemObj])
+      .order("id", { ascending: false })
+      .then(({ data }) => {
+        setListaMensagem([data[0], ...listaMensagem]);
+        setMensagem("");
+      });
   }
   return (
     <Box
@@ -122,8 +145,6 @@ function Header() {
 }
 
 function MessageList(props) {
-  console.log("MessageList", props);
-
   return (
     <Box
       tag="ul"
@@ -166,7 +187,7 @@ function MessageList(props) {
                   display: "inline-block",
                   marginRight: "8px",
                 }}
-                src={`https://github.com/vanessametonini.png`}
+                src={`https://github.com/${mensagem.user}.png`}
               />{" "}
               <Text
                 styleSheet={{
@@ -189,7 +210,7 @@ function MessageList(props) {
                 {new Date().toLocaleDateString()}{" "}
               </Text>{" "}
             </Box>{" "}
-            {mensagem.textoMensagem}{" "}
+            {mensagem.texto}{" "}
           </Text>
         );
       })}
