@@ -15,7 +15,6 @@ function escutaMensagemTempoReal(adicionaMensagem) {
     .from("mensagens")
     .on("INSERT", (resposta) => {
       adicionaMensagem(resposta.new);
-      console.log(resposta.new);
     })
     .subscribe();
 }
@@ -27,14 +26,6 @@ export default function ChatPage(props) {
   const usuarioLogado = roteamento.query.username;
 
   // ./Sua lógica vai aqui
-
-  useEffect(() => {
-    console.log(props);
-  }, []);
-
-  useEffect(() => {
-    console.log(roteamento.query);
-  }, [roteamento]);
 
   useEffect(() => {
     supabaseClient
@@ -68,7 +59,6 @@ export default function ChatPage(props) {
       .then(({ data }) => {
         setMensagem("");
       });
-    console.log("handle mensagem");
   }
   return (
     <Box
