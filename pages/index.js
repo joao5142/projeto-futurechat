@@ -62,7 +62,7 @@ export default function PaginaInicial() {
           <Box
             onSubmit={(e) => {
               e.preventDefault();
-              roteamento.push("/chat");
+              roteamento.push(`/chat?username=${username}`);
             }}
             as="form"
             styleSheet={{

@@ -2,43 +2,73 @@ import { Box, Text, TextField, Image, Button } from "@skynexui/components";
 import React from "react";
 import appConfig from "../config.json";
 import { createClient } from "@supabase/supabase-js";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { ButtonSendSticker } from "../src/components/ButtonSendSticker.js";
 const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMyNjUzOCwiZXhwIjoxOTU4OTAyNTM4fQ.Somu03I_F7LFatsd9nKx5wjYTpf3uGjG5H0OdBFwsTc";
 const SUPABASE_URL = "https://fchcyfmpfumtmyytievh.supabase.co";
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+function escutaMensagemTempoReal(adicionaMensagem) {
+  return supabaseClient
+    .from("mensagens")
+    .on("INSERT", (resposta) => {
+      adicionaMensagem(resposta.new);
+      console.log(resposta.new);
+    })
+    .subscribe();
+}
 export default function ChatPage(props) {
   // Sua lógica vai aqui
-  const [mensagem, setMensagem] = React.useState("");
-  const [listaMensagem, setListaMensagem] = React.useState([]);
+  const [mensagem, setMensagem] = useState("");
+  const [listaMensagem, setListaMensagem] = useState([]);
+  const roteamento = useRouter();
+  const usuarioLogado = roteamento.query.username;
+
   // ./Sua lógica vai aqui
 
-  React.useEffect(() => {
+  useEffect(() => {
     console.log(props);
   }, []);
-  React.useEffect(() => {
+
+  useEffect(() => {
+    console.log(roteamento.query);
+  }, [roteamento]);
+
+  useEffect(() => {
     supabaseClient
       .from("mensagens")
       .select("*")
+      .order("id", { ascending: false })
       .then(({ data }) => {
-        setListaMensagem(data, ...listaMensagem);
+        setListaMensagem(data, ...listaMensagem); //se setar a mesma variavel na dependencia vai entrar em loop
       });
-  }, [listaMensagem]);
+
+    escutaMensagemTempoReal((msg) => {
+      setListaMensagem((valorAtualLista) => {
+        return [msg, ...valorAtualLista];
+      });
+      setMensagem("");
+    });
+  }, []);
 
   function handleNovaMensagem(novaMensagem) {
     const mensagemObj = {
-      user: "vanessa",
+      user: usuarioLogado,
       texto: novaMensagem,
     };
     //tem que ser um objeto com os mesmos campos
     supabaseClient
       .from("mensagens")
       .insert([mensagemObj])
-      .order("id", { ascending: false })
+      .order("id", {
+        ascending: false,
+      })
       .then(({ data }) => {
-        setListaMensagem([data[0], ...listaMensagem]);
         setMensagem("");
       });
+    console.log("handle mensagem");
   }
   return (
     <Box
@@ -81,7 +111,7 @@ export default function ChatPage(props) {
             padding: "16px",
           }}
         >
-          <MessageList mensagens={listaMensagem} />
+          <MessageList mensagens={listaMensagem} />{" "}
           <Box
             as="form"
             styleSheet={{
@@ -113,6 +143,11 @@ export default function ChatPage(props) {
                 color: appConfig.theme.colors.neutrals[200],
               }}
             />{" "}
+            <ButtonSendSticker
+              onStickerClick={(sticker) => {
+                handleNovaMensagem(`:sticker:${sticker}`);
+              }}
+            />
           </Box>{" "}
         </Box>{" "}
       </Box>{" "}
@@ -132,7 +167,7 @@ function Header() {
           justifyContent: "space-between",
         }}
       >
-        <Text variant="heading5">Chat </Text>{" "}
+        <Text variant="heading5"> Chat </Text>{" "}
         <Button
           variant="tertiary"
           colorVariant="neutral"
@@ -207,13 +242,17 @@ function MessageList(props) {
                 }}
                 tag="span"
               >
-                {new Date().toLocaleDateString()}{" "}
+                {mensagem.created_at}{" "}
               </Text>{" "}
             </Box>{" "}
-            {mensagem.texto}{" "}
+            {mensagem.texto.startsWith(":sticker:") ? (
+              <Image src={mensagem.texto.replace(":sticker:", "")} />
+            ) : (
+              mensagem.texto
+            )}{" "}
           </Text>
         );
-      })}
+      })}{" "}
     </Box>
   );
 }
