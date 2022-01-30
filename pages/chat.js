@@ -5,9 +5,9 @@ import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { ButtonSendSticker } from "../src/components/ButtonSendSticker.js";
-const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMyNjUzOCwiZXhwIjoxOTU4OTAyNTM4fQ.Somu03I_F7LFatsd9nKx5wjYTpf3uGjG5H0OdBFwsTc";
-const SUPABASE_URL = "https://fchcyfmpfumtmyytievh.supabase.co";
+
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function escutaMensagemTempoReal(adicionaMensagem) {
@@ -18,6 +18,7 @@ function escutaMensagemTempoReal(adicionaMensagem) {
     })
     .subscribe();
 }
+
 export default function ChatPage(props) {
   // Sua lógica vai aqui
   const [mensagem, setMensagem] = useState("");
@@ -31,7 +32,9 @@ export default function ChatPage(props) {
     supabaseClient
       .from("mensagens")
       .select("*")
-      .order("id", { ascending: false })
+      .order("id", {
+        ascending: false,
+      })
       .then(({ data }) => {
         setListaMensagem(data, ...listaMensagem); //se setar a mesma variavel na dependencia vai entrar em loop
       });
@@ -137,7 +140,7 @@ export default function ChatPage(props) {
               onStickerClick={(sticker) => {
                 handleNovaMensagem(`:sticker:${sticker}`);
               }}
-            />
+            />{" "}
           </Box>{" "}
         </Box>{" "}
       </Box>{" "}
